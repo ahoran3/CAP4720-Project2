@@ -31,14 +31,44 @@ function parseJSON(jsonFile)
 }
 var gl;
 var model, camera, projMatrix;
+var modelTextures = Array();
 
 function loadModel(modelfilename)
 {
-//console.log(modelfilename);
 	addMessage("loading "+modelfilename);
 	model = new RenderableModel(gl,parseJSON(modelfilename));
 	camera = new Camera(gl,model.getBounds(),[0,1,0]);
 	projMatrix = camera.getProjMatrix();
+	
+	// geometry is loaded, now load textures
+	
+	function initTexture()
+	{
+		var modelImage = new Image();
+
+		for (var i=0; i < 3; i++) {
+		  var texture = gl.createTexture();
+		  texture.image = modelImage;
+		  modelTextures.push(texture);
+		}
+    modelImage.onload = function()
+	{
+      handleLoadedTexture(modelTextures)
+    }
+	
+    modelImage.src = "crate.gif";
+	}
+
+	function createTexture(imageFileName)
+	{
+	  var tex = gl.createTexture();
+	  var img = new Image();
+	  img.onload = function(){
+		  gl.bindTexture(gl.TEXTURE_2D, tex);
+		  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+		  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+		  gl.bindTexture(gl.TEXTURE_2D, null);
+	}
 }
 
 var numImages;

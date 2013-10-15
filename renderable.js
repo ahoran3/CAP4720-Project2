@@ -5,30 +5,6 @@
 
 function RenderableModel(gl,model){
 
-	function handleLoadedTexture(textures) {
-		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-
-		gl.bindTexture(gl.TEXTURE_2D, textures[0]);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[0].image);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-
-		gl.bindTexture(gl.TEXTURE_2D, textures[1]);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[1].image);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-
-		gl.bindTexture(gl.TEXTURE_2D, textures[2]);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[2].image);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-		gl.generateMipmap(gl.TEXTURE_2D);
-
-		gl.bindTexture(gl.TEXTURE_2D, null);
-	}
-
-  var crateTextures = Array();
-
 	function Drawable(attribLocations, vArrays, nVertices, indexArray, drawMode){
 	  // Create a buffer object
 	  var vertexBuffers=[];
@@ -72,7 +48,6 @@ function RenderableModel(gl,model){
 		  else{
 			  gl.disableVertexAttribArray(attribLocations[i]); 
 			  gl.vertexAttrib3f(attribLocations[i],1,1,1);
-			  //console.log("Missing "+attribLocations[i])
 		  }
 		}
 		if (indexBuffer){
@@ -86,25 +61,23 @@ function RenderableModel(gl,model){
 	}
 	var VSHADER_SOURCE =
 	  'attribute vec3 position;\n' +
-	  'attribute vec3 color;\n' +
-	  'attribute vec2 aTextureCoord;\n' +
-	  'uniform mat4 modelT, viewT, projT;\n'+
-	  'varying vec3 fcolor;\n'+
-	  'varying vec2 vTextureCoord;\n'+
+	  'attribute vec2 texCoord;\n' +
+	  'varying vec2 tCoord;\n'+
 	  'void main() {\n' +
-	  '  vTextureCoord = aTextureCoord;\n'+
-	  '  gl_Position = projT*viewT*modelT*vec4(position,1.0);\n' +
-	  '  fcolor = color;\n'+
+	  '  gl_Position = vec4(position,1.0);\n' +
+	  '	 tCoord = texCoord;\n'+
 	  '}\n';
 
 	// Fragment shader program
 	var FSHADER_SOURCE =
 	  'precision mediump float;\n'+
-	  'uniform sampler2D uSampler;\n' +
-	  'varying vec2 vTextureCoord;\n' +
+	  'uniform sampler2D sampler;\n'+
+	  'varying vec2 tCoord;\n'+
 	  'void main() {\n' +
-	  '  gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));\n' +
+	  '  vec3 color = texture2D(sampler, tCoord).rgb;\n'+
+	  '  gl_FragColor = vec4(color,1.0);\n' +
 	  '}\n';
+
 	var program = createProgram(gl, VSHADER_SOURCE, FSHADER_SOURCE);
 	if (!program) {
 	}
@@ -147,11 +120,7 @@ function RenderableModel(gl,model){
 		gl.useProgram(program);
 		gl.uniformMatrix4fv(pmLoc, false, pMatrix.elements);
 		gl.uniformMatrix4fv(vmLoc, false, vMatrix.elements);
-		//var vpMatrix = new Matrix4(pMatrix).multiply(vMatrix); // Right multiply
 		for (var i= 0; i<nDrawables; i++){
-			//var mMatrix=modelTransformations[i];
-			//var mvpMatrix = new Matrix4(vpMatrix).multiply(mMatrix);
-			//gl.uniformMatrix4fv(mvpLoc, false, mvpMatrix.elements);
 			gl.uniformMatrix4fv(mmLoc, false, 
 				(mMatrix)?(new Matrix4(mMatrix).multiply(modelTransformations[i])).elements
 						:modelTransformations[i].elements);
