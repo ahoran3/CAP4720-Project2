@@ -1,6 +1,7 @@
-// Alex Horan
-// CAP 4720- HW 5
-// October 10, 2013
+// Jonathan Cools-Lartigue, Brandon Forster
+// Matt Hansen, Alex Horan
+// CAP 4720- Project 2
+// 17 October 2013
 
 function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dimensions
 {

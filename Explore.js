@@ -37,40 +37,9 @@ var numTextures;
 function loadModel(modelfilename)
 {
 	addMessage("loading "+modelfilename+ "\\models\\model.json");
-	model = new RenderableModel(gl,parseJSON(modelfilename+ "\\models\\model.json"));
+	model = new RenderableModel(gl,parseJSON(modelfilename+ "\\models\\model.json"), modelfilename);
 	camera = new Camera(gl,model.getBounds(),[0,1,0]);
 	projMatrix = camera.getProjMatrix();
-	
-	// geometry is loaded, now load textures
-	var modelImage = new Image();
-
-	for (var i=0; i < numTextures; i++) 
-	{
-	  addMessage("loading "+modelfilename+ "\\images\\texture"+i+".jpg");
-	  modelImage.src = modelfilename+ "\\images\\texture"+i+".jpg";
-	
-	  var texture = gl.createTexture();
-	  texture.image = modelImage;
-	  modelTextures.push(texture);
-	}
-	
-    modelImage.onload = function()
-	{
-      handleLoadedTexture(modelTextures)
-    }
-
-	function createTexture(imageFileName)
-	{
-	  var tex = gl.createTexture();
-	  var img = new Image();
-	  img.onload = function()
-	  {
-		  gl.bindTexture(gl.TEXTURE_2D, tex);
-		  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
-		  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-		  gl.bindTexture(gl.TEXTURE_2D, null);
-	  }
-	}
 }
 
 function mainFunction(){

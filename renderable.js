@@ -3,7 +3,7 @@
 // CAP 4720- Project 2
 // 17 October 2013
 
-function RenderableModel(gl,model){
+function RenderableModel(gl,model,texturePath){
 
 	function Drawable(attribLocations, vArrays, nVertices, indexArray, drawMode){
 	  // Create a buffer object
@@ -114,12 +114,37 @@ function RenderableModel(gl,model){
 			nDrawables++;
 		}
 	}
+	
+	
+	
+	for (var i=0; i < numTextures; i++) 
+	{
+		var texture = gl.createTexture();
+
+		var modelImage = new Image();
+		modelImage.onload = function(){
+		  gl.bindTexture(gl.TEXTURE_2D, tex);
+		  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+		  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+		  gl.bindTexture(gl.TEXTURE_2D, null);
+		};
+		modelImage.src= modelfilename+ "\\images\\texture"+i+".jpg";
+		modelTextures.push(texture);
+	}
+	
 	// Get the location/address of the vertex attribute inside the shader program.
 	this.draw = function (pMatrix,vMatrix,mMatrix)
 	{
 		gl.useProgram(program);
 		gl.uniformMatrix4fv(pmLoc, false, pMatrix.elements);
 		gl.uniformMatrix4fv(vmLoc, false, vMatrix.elements);
+		
+		//texture stuff
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D,modelTextures[0]);
+		var samplerLoc=gl.getUniformLocation(program,"sampler");
+		gl.uniform1i(samplerLoc,0); // 0 identifies TEXTURE0 \
+		
 		for (var i= 0; i<nDrawables; i++){
 			gl.uniformMatrix4fv(mmLoc, false, 
 				(mMatrix)?(new Matrix4(mMatrix).multiply(modelTransformations[i])).elements
