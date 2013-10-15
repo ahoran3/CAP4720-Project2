@@ -1,8 +1,4 @@
-// Jonathan Cools-Lartigue, Brandon Forster
-// Matt Hansen, Alex Horan
-// CAP 4720- Project 2
-// 17 October 2013
-
+"use strict";
 function RenderableModel(gl,model){
 	function Drawable(attribLocations, vArrays, nVertices, indexArray, drawMode){
 	  // Create a buffer object
@@ -59,24 +55,37 @@ function RenderableModel(gl,model){
 		}
 	  }
 	}
+	
+	// Vertex shader program
 	var VSHADER_SOURCE =
-	  'attribute vec3 position;\n' +
-	  'attribute vec3 color;\n' +
-	  //'uniform mat4 mvpT;'+
-	  'uniform mat4 modelT, viewT, projT;'+
-	  'varying vec3 fcolor;'+
+	  'attribute vec3 position;\n' + 
+	  'attribute vec3 normal;\n' + 
+	  'uniform mat4 modelT, viewT, projT;\n' + 
+	  'uniform mat4 normalMatrix;\n' + 
+	  'uniform vec3 lightColor, lightPosition, ambientLight;\n' + 
+	  'varying vec3 fcolor;\n' +
+	  'varying vec3 fragPosition;\n' + 
+	  'varying vec3 fragNormal;\n' + 
 	  'void main() {\n' +
-	  //'  gl_Position = mvpT*vec4(position,1.0);\n' +
-	  '  gl_Position = projT*viewT*modelT*vec4(position,1.0);\n' +
-	  '  fcolor = color;'+
+	  '  gl_Position = projT*viewT*modelT*vec4(position,1.0);\n' + 
+	  '  fragNormal = normalize((normalMatrix * vec4(normal, 0.0)).xyz);\n' +
+	  '  fragPosition = (modelT * vec4(position, 1.0)).xyz;\n' +
+      '  vec3 lightDirection = normalize(lightPosition - fragPosition);\n' +
+	  '  float cosThetaIn = max(dot(fragNormal, lightDirection), 0.0);\n' +
+	  '  vec3 diffuse = lightColor * vec3(0.8,0.8,0.8) * cosThetaIn;\n' +
+	  '  vec3 ambient = ambientLight * vec3(0.8,0.8,0.8);\n' +
+	  '  fcolor = (diffuse + ambient);\n' +
 	  '}\n';
 
 	// Fragment shader program
 	var FSHADER_SOURCE =
-	  'varying lowp vec3 fcolor;'+
+	  'varying lowp vec3 fcolor;\n' +
+	  'varying lowp vec3 fragPosition;\n' +
+	  'varying lowp vec3 fragNormal;\n' +
 	  'void main() {\n' +
-	  '  gl_FragColor = vec4(fcolor,1.0);\n' +
+	  '  gl_FragColor = vec4(fcolor, 1.0);\n' +
 	  '}\n';
+	  
 	var program = createProgram(gl, VSHADER_SOURCE, FSHADER_SOURCE);
 	if (!program) {
 		console.log('Failed to create program');
@@ -84,28 +93,37 @@ function RenderableModel(gl,model){
 	}
 	//else console.log('Shader Program was successfully created.');
 	var a_Position = gl.getAttribLocation(program, 'position');		  
-	var a_Color = gl.getAttribLocation(program, 'color');
-	var a_Locations = [a_Position,a_Color];
+	//var a_Color = gl.getAttribLocation(program, 'color');
+	var a_Normal = gl.getAttribLocation(program, 'normal');
+	var a_Locations = [a_Position,a_Normal];
 	//console.log(a_Locations);
 	// Get the location/address of the uniform variable inside the shader program.
 	var mmLoc = gl.getUniformLocation(program,"modelT");
 	var vmLoc = gl.getUniformLocation(program,"viewT");
 	var pmLoc = gl.getUniformLocation(program,"projT");
 	//var mvpLoc = gl.getUniformLocation(program,"mvpT");
+	var u_NormalMatrix = gl.getUniformLocation(program, 'normalMatrix');
+	var u_LightColor = gl.getUniformLocation(program, 'lightColor');
+	var u_LightPosition = gl.getUniformLocation(program, 'lightPosition');
+	var u_AmbientLight = gl.getUniformLocation(program, 'ambientLight');
+
+	var normalMat = new Matrix4();
 	
-	var drawables=[];
-	var modelTransformations=[];
-	var nDrawables=0;
+	var drawables = [];
+	var modelTransformations = [];
+	var nDrawables = 0;
 	var nNodes = (model.nodes)? model.nodes.length:1;
 	var drawMode=(model.drawMode)?gl[model.drawMode]:gl.TRIANGLES;
 
-	for (var i= 0; i<nNodes; i++){
+	for (var i = 0; i < nNodes; i++){
 		var nMeshes = (model.nodes)?(model.nodes[i].meshIndices.length):(model.meshes.length);
-		for (var j=0; j<nMeshes;j++){
+		for (var j = 0; j < nMeshes; j++){
 			var index = (model.nodes)?model.nodes[i].meshIndices[j]:j;
 			var mesh = model.meshes[index];
+			// setup normal
+			//a_Normal = mesh.vertexNormals;
 			drawables[nDrawables] = new Drawable(
-				a_Locations,[mesh.vertexPositions, mesh.vertexColors],
+				a_Locations,[mesh.vertexPositions, mesh.vertexNormals],
 				mesh.vertexPositions.length/3,
 				mesh.indices, drawMode
 			);
@@ -124,14 +142,28 @@ function RenderableModel(gl,model){
 		gl.useProgram(program);
 		gl.uniformMatrix4fv(pmLoc, false, pMatrix.elements);
 		gl.uniformMatrix4fv(vmLoc, false, vMatrix.elements);
+		
+		// Set the light color (white)
+		gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
+		// Set the light direction (in the world coordinate)
+		gl.uniform3fv(u_LightPosition, camera.neweye);
+		// Set the ambient light
+		gl.uniform3f(u_AmbientLight, 0.1, 0.1, 0.1);
+		
 		//var vpMatrix = new Matrix4(pMatrix).multiply(vMatrix); // Right multiply
-		for (var i= 0; i<nDrawables; i++){
+		for (var i = 0; i < nDrawables; i++){
 			//var mMatrix=modelTransformations[i];
 			//var mvpMatrix = new Matrix4(vpMatrix).multiply(mMatrix);
 			//gl.uniformMatrix4fv(mvpLoc, false, mvpMatrix.elements);
-			gl.uniformMatrix4fv(mmLoc, false, 
-				(mMatrix)?(new Matrix4(mMatrix).multiply(modelTransformations[i])).elements
-						:modelTransformations[i].elements);
+			gl.uniformMatrix4fv(mmLoc, false, (mMatrix)?(new Matrix4(mMatrix).multiply(modelTransformations[i])).elements
+				:modelTransformations[i].elements);
+
+			// Pass the matrix to transform the normal based on the model matrix to u_NormalMatrix
+			//normalMat = modelMatrixToNormalMatrix(vMatrix);
+			normalMat.setInverseOf(vMatrix);
+			normalMat.transpose();
+			gl.uniformMatrix4fv(u_NormalMatrix, false, normalMat.elements);
+			
 			drawables[i].draw();
 		}
 		gl.useProgram(null);
@@ -172,12 +204,40 @@ function RenderableModel(gl,model){
 				}
 			}
 		}
-		var dim= {};
+		var dim = {};
 		dim.min = [xmin,ymin,zmin];
 		dim.max = [xmax,ymax,zmax];
 		//console.log(dim);
 		return dim;
 	}
+}
+function modelMatrixToNormalMatrix(mat)
+{ 
+	var a00 = mat.elements[0], a01 = mat.elements[1], a02 = mat.elements[2],
+	a10 = mat.elements[4], a11 = mat.elements[5], a12 = mat.elements[6],
+	a20 = mat.elements[8], a21 = mat.elements[9], a22 = mat.elements[10],
+	b01 = a22 * a11 - a12 * a21,
+	b11 = -a22 * a10 + a12 * a20,
+	b21 = a21 * a10 - a11 * a20,
+	d = a00 * b01 + a01 * b11 + a02 * b21,
+	id;
+
+	if (!d) { return null; }
+	id = 1 / d;
+
+	var dest = new Matrix4();
+
+	dest.elements[0] = b01 * id;
+	dest.elements[4] = (-a22 * a01 + a02 * a21) * id;
+	dest.elements[8] = (a12 * a01 - a02 * a11) * id;
+	dest.elements[1] = b11 * id;
+	dest.elements[5] = (a22 * a00 - a02 * a20) * id;
+	dest.elements[9] = (-a12 * a00 + a02 * a10) * id;
+	dest.elements[2] = b21 * id;
+	dest.elements[6] = (-a21 * a00 + a01 * a20) * id;
+	dest.elements[10] = (a11 * a00 - a01 * a10) * id;
+
+	return dest;
 }
 function RenderableWireBoxModel(gl,d){
 	var wireModel = new RenderableModel(gl,cubeLineObject);
