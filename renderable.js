@@ -4,6 +4,31 @@
 // 17 October 2013
 
 function RenderableModel(gl,model){
+
+	function handleLoadedTexture(textures) {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+		gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[0].image);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+		gl.bindTexture(gl.TEXTURE_2D, textures[1]);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[1].image);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+		gl.bindTexture(gl.TEXTURE_2D, textures[2]);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[2].image);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+		gl.generateMipmap(gl.TEXTURE_2D);
+
+		gl.bindTexture(gl.TEXTURE_2D, null);
+	}
+
+  var crateTextures = Array();
+
 	function Drawable(attribLocations, vArrays, nVertices, indexArray, drawMode){
 	  // Create a buffer object
 	  var vertexBuffers=[];
@@ -62,36 +87,34 @@ function RenderableModel(gl,model){
 	var VSHADER_SOURCE =
 	  'attribute vec3 position;\n' +
 	  'attribute vec3 color;\n' +
-	  //'uniform mat4 mvpT;'+
-	  'uniform mat4 modelT, viewT, projT;'+
-	  'varying vec3 fcolor;'+
+	  'attribute vec2 aTextureCoord;\n' +
+	  'uniform mat4 modelT, viewT, projT;\n'+
+	  'varying vec3 fcolor;\n'+
+	  'varying vec2 vTextureCoord;\n'+
 	  'void main() {\n' +
-	  //'  gl_Position = mvpT*vec4(position,1.0);\n' +
+	  '  vTextureCoord = aTextureCoord;\n'+
 	  '  gl_Position = projT*viewT*modelT*vec4(position,1.0);\n' +
-	  '  fcolor = color;'+
+	  '  fcolor = color;\n'+
 	  '}\n';
 
 	// Fragment shader program
 	var FSHADER_SOURCE =
-	  'varying lowp vec3 fcolor;'+
+	  'precision mediump float;\n'+
+	  'uniform sampler2D uSampler;\n' +
+	  'varying vec2 vTextureCoord;\n' +
 	  'void main() {\n' +
-	  '  gl_FragColor = vec4(fcolor,1.0);\n' +
+	  '  gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));\n' +
 	  '}\n';
 	var program = createProgram(gl, VSHADER_SOURCE, FSHADER_SOURCE);
 	if (!program) {
-		console.log('Failed to create program');
-		return false;
 	}
-	//else console.log('Shader Program was successfully created.');
 	var a_Position = gl.getAttribLocation(program, 'position');		  
 	var a_Color = gl.getAttribLocation(program, 'color');
 	var a_Locations = [a_Position,a_Color];
-	//console.log(a_Locations);
 	// Get the location/address of the uniform variable inside the shader program.
 	var mmLoc = gl.getUniformLocation(program,"modelT");
 	var vmLoc = gl.getUniformLocation(program,"viewT");
 	var pmLoc = gl.getUniformLocation(program,"projT");
-	//var mvpLoc = gl.getUniformLocation(program,"mvpT");
 	
 	var drawables=[];
 	var modelTransformations=[];
@@ -144,17 +167,12 @@ function RenderableModel(gl,model){
 		for (var k=0; k<nNodes; k++){
 			var m = new Matrix4();
 			if (model.nodes)m.elements=new Float32Array(model.nodes[k].modelMatrix);
-			//console.log(model.nodes[k].modelMatrix);
 			var nMeshes = (model.nodes)?model.nodes[k].meshIndices.length:model.meshes.length;
 			for (var n = 0; n < nMeshes; n++){
 				var index = (model.nodes)?model.nodes[k].meshIndices[n]:n;
 				var mesh = model.meshes[index];
 				for(var i=0;i<mesh.vertexPositions.length; i+=3){
 					var vertex = m.multiplyVector4(new Vector4([mesh.vertexPositions[i],mesh.vertexPositions[i+1],mesh.vertexPositions[i+2],1])).elements;
-					//if (i==0){
-					//	console.log([mesh.vertexPositions[i],mesh.vertexPositions[i+1],mesh.vertexPositions[i+2]]);
-					//	console.log([vertex[0], vertex[1], vertex[2]]);
-					//}
 					if (firstvertex){
 						xmin = xmax = vertex[0];
 						ymin = ymax = vertex[1];
@@ -175,7 +193,6 @@ function RenderableModel(gl,model){
 		var dim= {};
 		dim.min = [xmin,ymin,zmin];
 		dim.max = [xmax,ymax,zmax];
-		//console.log(dim);
 		return dim;
 	}
 }

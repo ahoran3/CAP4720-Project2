@@ -31,6 +31,7 @@ function parseJSON(jsonFile)
 }
 var gl;
 var model, camera, projMatrix;
+
 function loadModel(modelfilename)
 {
 //console.log(modelfilename);
@@ -38,6 +39,12 @@ function loadModel(modelfilename)
 	model = new RenderableModel(gl,parseJSON(modelfilename));
 	camera = new Camera(gl,model.getBounds(),[0,1,0]);
 	projMatrix = camera.getProjMatrix();
+}
+
+var numImages;
+function getNumImages()
+{
+	return numImages;
 }
 
 function mainFunction(){
@@ -53,6 +60,20 @@ function mainFunction(){
 	addMessage(modelList.options[modelList.selectedIndex].value);
 	loadModel(modelList.options[modelList.selectedIndex].value);
 	addMessage("Using model " + modelList.options[modelList.selectedIndex].value);
+	
+	switch (modelList.selectedIndex)
+	{
+		case 0: numImages= 0; break;    //cube
+		case 1: numImages= 0; break;    //teapot
+		case 2: numImages= 0; break;    //skull
+		case 3: numImages= 204; break;  //st peter
+		case 4: numImages= 62; break;   //st basil
+		case 5: numImages= 83; break;   //shrine
+		case 6: numImages= 43; break;   //dijon
+		case 7: numImages= 16; break;   //house
+		default:numImages= 0; break;    //whoops
+	}
+	
 
 	function draw(){
 		gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
