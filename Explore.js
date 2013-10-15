@@ -35,8 +35,8 @@ var modelTextures = Array();
 
 function loadModel(modelfilename)
 {
-	addMessage("loading "+modelfilename);
-	model = new RenderableModel(gl,parseJSON(modelfilename));
+	addMessage("loading "+modelfilename+ "\\models\\model.json");
+	model = new RenderableModel(gl,parseJSON(modelfilename+ "\\models\\model.json"));
 	camera = new Camera(gl,model.getBounds(),[0,1,0]);
 	projMatrix = camera.getProjMatrix();
 	
@@ -68,6 +68,7 @@ function loadModel(modelfilename)
 		  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
 		  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
 		  gl.bindTexture(gl.TEXTURE_2D, null);
+	  }
 	}
 }
 
@@ -86,16 +87,13 @@ function mainFunction(){
 	gl = getWebGLContext(canvas);
 	
 	var angle=0;
-	var modelList = document.getElementById("modelList")
+	var modelList = document.getElementById("modelList");
 	addMessage(modelList.options[modelList.selectedIndex].value);
 	loadModel(modelList.options[modelList.selectedIndex].value);
 	addMessage("Using model " + modelList.options[modelList.selectedIndex].value);
 	
 	switch (modelList.selectedIndex)
 	{
-		case 0: numImages= 0; break;    //cube
-		case 1: numImages= 0; break;    //teapot
-		case 2: numImages= 0; break;    //skull
 		case 3: numImages= 204; break;  //st peter
 		case 4: numImages= 62; break;   //st basil
 		case 5: numImages= 83; break;   //shrine
