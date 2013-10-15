@@ -32,6 +32,7 @@ function parseJSON(jsonFile)
 var gl;
 var model, camera, projMatrix;
 var modelTextures = Array();
+var numTextures;
 
 function loadModel(modelfilename)
 {
@@ -41,41 +42,35 @@ function loadModel(modelfilename)
 	projMatrix = camera.getProjMatrix();
 	
 	// geometry is loaded, now load textures
-	
-	function initTexture()
-	{
-		var modelImage = new Image();
+	var modelImage = new Image();
 
-		for (var i=0; i < 3; i++) {
-		  var texture = gl.createTexture();
-		  texture.image = modelImage;
-		  modelTextures.push(texture);
-		}
+	for (var i=0; i < numTextures; i++) 
+	{
+	  addMessage("loading "+modelfilename+ "\\images\\texture"+i+".jpg");
+	  modelImage.src = modelfilename+ "\\images\\texture"+i+".jpg";
+	
+	  var texture = gl.createTexture();
+	  texture.image = modelImage;
+	  modelTextures.push(texture);
+	}
+	
     modelImage.onload = function()
 	{
       handleLoadedTexture(modelTextures)
     }
-	
-    modelImage.src = "crate.gif";
-	}
 
 	function createTexture(imageFileName)
 	{
 	  var tex = gl.createTexture();
 	  var img = new Image();
-	  img.onload = function(){
+	  img.onload = function()
+	  {
 		  gl.bindTexture(gl.TEXTURE_2D, tex);
 		  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
 		  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
 		  gl.bindTexture(gl.TEXTURE_2D, null);
 	  }
 	}
-}
-
-var numImages;
-function getNumImages()
-{
-	return numImages;
 }
 
 function mainFunction(){
@@ -88,19 +83,18 @@ function mainFunction(){
 	
 	var angle=0;
 	var modelList = document.getElementById("modelList");
-	addMessage(modelList.options[modelList.selectedIndex].value);
 	loadModel(modelList.options[modelList.selectedIndex].value);
 	addMessage("Using model " + modelList.options[modelList.selectedIndex].value);
 	
 	switch (modelList.selectedIndex)
 	{
-		case 3: numImages= 204; break;  //st peter
-		case 4: numImages= 62; break;   //st basil
-		case 5: numImages= 83; break;   //shrine
-		case 6: numImages= 43; break;   //dijon
-		case 7: numImages= 16; break;   //house
-		default:numImages= 0; break;    //whoops
-	}
+		case 0:  numTextures= 204; break; //st peter
+		case 1:  numTextures= 62;  break; //st basil
+		case 2:  numTextures= 83;  break; //shrine
+		case 3:  numTextures= 43;  break; //dijon
+		case 4:  numTextures= 16;  break; //house
+		default: numTextures= 0;   break; //whoops
+	} 
 	
 
 	function draw(){
