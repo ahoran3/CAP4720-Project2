@@ -51,70 +51,87 @@ function handleKeys() {
 		D : 68,
 		Q : 81,
 		E : 69,
+		Z : 90,
+		X : 88,
 		UP_ARROW 	: 38,
 		LEFT_ARROW	: 37,
 		RIGHT_ARROW	: 39,
 		DOWN_ARROW 	: 40
 	}
 
+	//functions for user camera control 
+	//the '-1' or '+1' from the parameter allows user to use the same function with different directions
+	
+	if (currentlyPressedKeys[KeyboardEnum.Z]) {
+	  // z - ZOOM IN 
+	  console.log("z");
+	  projMatrix = camera.getZoomedProjMatrix(1);
+	}
+
+	if (currentlyPressedKeys[KeyboardEnum.X]) {
+	  // x- ZOOM OUT 
+	  console.log("x");
+	  projMatrix = camera.getZoomedProjMatrix(-1);
+	}	
+
 	if (currentlyPressedKeys[KeyboardEnum.W]) {
 	  // w - DOLLY-IN (MOVE FORWARD)
 	  console.log("w");
-	  var viewMatrix = camera.getDolliedViewMatrix(1);
+	  var viewMatrix = camera.getDolliedViewCameraPosition(1);
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.A]) {
 	  // a - 	TRUCK LEFT 
 	  console.log("a");
-	  var viewMatrix = camera.getTruckedViewMatrix(1);
+	  var viewMatrix = camera.getTruckedViewCameraPosition(1);
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.S]) {
 	  // s - DOLLY-OUT (MOVE BACK)
 	  console.log("s");
-	  var viewMatrix = camera.getDolliedViewMatrix(-1);
+	  var viewMatrix = camera.getDolliedViewCameraPosition(-1);
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.D]) {
 	  // d - TRUCK RIGHT
 	  console.log("d");
-	  var viewMatrix = camera.getTruckedViewMatrix(-1);
+	  var viewMatrix = camera.getTruckedViewCameraPosition(-1);
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.Q]) {
 	  // q - PEDESTAL UP (CAMERA HEIGHT) 
 	  console.log("q");
-	  var viewMatrix = camera.getPedestaledViewMatrix(1);
+	  var viewMatrix = camera.getPedestaledViewCameraPosition(1);
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.E]) {
 	  // e - PEDESTAL DOWN (CAMERA HEIGHT)
 	  console.log("e");
-	  var viewMatrix = camera.getPedestaledViewMatrix(-1);
+	  var viewMatrix = camera.getPedestaledViewCameraPosition(-1);
 	}
 	
 	if (currentlyPressedKeys[KeyboardEnum.LEFT_ARROW]) {
 	  // Left cursor key - HORIZONTAL PAN (YAW) LEFT
 	  console.log("<");
-	  var viewMatrix = camera.getYawedViewMatrix(1);
+	  var viewMatrix = camera.getYawedViewCameraPosition(1);
 	}
 	
 	if (currentlyPressedKeys[KeyboardEnum.RIGHT_ARROW]) {
 	  // Right cursor key - HORIZONTAL PAN (YAW) RIGHT
 	  console.log(">");
-	  var viewMatrix = camera.getYawedViewMatrix(-1);
+	  var viewMatrix = camera.getYawedViewCameraPosition(-1);
 	}
 	
 	if (currentlyPressedKeys[KeyboardEnum.UP_ARROW]) {
 	  // Up cursor key - VERTICAL PAN (TILT) UP 	
 	  console.log("^");
-	  var viewMatrix = camera.getTiltedViewMatrix(1);
+	  var viewMatrix = camera.getTiltedViewCameraPosition(1);
 	}
 	
 	if (currentlyPressedKeys[KeyboardEnum.DOWN_ARROW]) {
 	  // Down cursor key - VERTICAL PAN (TILT) DOWN
 	  console.log("V");
-	  var viewMatrix = camera.getTiltedViewMatrix(-1);
+	  var viewMatrix = camera.getTiltedViewCameraPosition(-1);
 	}
 }
 

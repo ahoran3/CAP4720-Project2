@@ -7,6 +7,7 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 {
 	var center = [(d.min[0]+d.max[0])/2,(d.min[1]+d.max[1])/2,(d.min[2]+d.max[2])/2];
 	var diagonal = Math.sqrt(Math.pow((d.max[0]-d.min[0]),2)+Math.pow((d.max[1]-d.min[1]),2)+Math.pow((d.max[2]-d.min[2]),2));
+	var ZoomDelta = Math.sqrt(Math.sqrt(diagonal/4)); //basically arbitrarily picked
 	//console.log(center+" "+diagonal);
 	
 	//variables for automatic camera rotation	
@@ -17,9 +18,6 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 	var near = diagonal*0.1;
 	var far = diagonal*3;
 	var FOV = 32;
-
-	//variables for user camera movement
-
 
 	this.neweye=eye;
 	this.speclight=eye;
@@ -39,20 +37,29 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 	this.getProjMatrix=function(){
 		return new Matrix4().setPerspective(FOV, gl.canvas.width / gl.canvas.height, near , far);
 	}
-	this.getTiltedViewMatrix=function(direction){
-
-	}
-	this.getYawedViewMatrix=function(direction){ 
-
-	}
-	this.getPedestaledViewMatrix=function(direction){ 
 	
-	}
-	this.getTruckedViewMatrix=function(direction){ 
+	//functions for user camera control 
+	//the '-1' or '+1' from the parameter in main.js allows us to use the same function with different directions
 	
+	this.getZoomedProjMatrix=function(direction){
+		FOV = Math.min(60,Math.max((FOV + direction*ZoomDelta),5));
+		return camera.getProjMatrix();
 	}
-	this.getDolliedViewMatrix=function(direction){ 
-	
+	this.getTiltedViewCameraPosition=function(direction){
+		//translate(eyePoint[0],eyePoint[1],eyePoint[2]) * rotate(tiltAngle,U[0],U[1],U[2]) * translate(-eyePoint[0],-eyePoint[1],-eyePoint[2]) * atPoint
+		//return direction*;
+	}
+	this.getYawedViewCameraPosition=function(direction){ 
+		//return direction*;
+	}
+	this.getPedestaledViewCameraPosition=function(direction){ 
+		//return direction*;
+	}
+	this.getTruckedViewCameraPosition=function(direction){ 
+		//return direction*;
+	}
+	this.getDolliedViewCameraPosition=function(direction){ 
+		//return direction*;
 	};
 
 
