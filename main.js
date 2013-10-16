@@ -65,13 +65,13 @@ function handleKeys() {
 	if (currentlyPressedKeys[KeyboardEnum.Z]) {
 	  // z - ZOOM IN 
 	  console.log("z");
-	  projMatrix = camera.getZoomedProjMatrix(1);
+	  projMatrix = camera.getZoomedProjMatrix(-1);
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.X]) {
 	  // x- ZOOM OUT 
 	  console.log("x");
-	  projMatrix = camera.getZoomedProjMatrix(-1);
+	  projMatrix = camera.getZoomedProjMatrix(1);
 	}	
 
 	if (currentlyPressedKeys[KeyboardEnum.W]) {
