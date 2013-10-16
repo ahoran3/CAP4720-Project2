@@ -1,3 +1,8 @@
+// Jonathan Cools-Lartigue, Brandon Forster
+// Matt Hansen, Alex Horan
+// CAP 4720- Project 2
+// 17 October 2013
+
 // This function gets called when reading a JSON file. It stores the current xml information.
 function parseJSON(jsonFile)
 {
@@ -53,61 +58,96 @@ function handleKeys() {
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.W]) {
-	  // w
+	  // w - DOLLY-IN (MOVE FORWARD)
 	  console.log("w");
+	  var viewMatrix = camera.getDolliedViewMatrix(1);
 	}
+
 	if (currentlyPressedKeys[KeyboardEnum.A]) {
-	  // a
+	  // a - 	TRUCK LEFT 
 	  console.log("a");
+	  var viewMatrix = camera.getTruckedViewMatrix(1);
 	}
+
 	if (currentlyPressedKeys[KeyboardEnum.S]) {
-	  // s
+	  // s - DOLLY-OUT (MOVE BACK)
 	  console.log("s");
+	  var viewMatrix = camera.getDolliedViewMatrix(-1);
 	}
+
 	if (currentlyPressedKeys[KeyboardEnum.D]) {
-	  // d
+	  // d - TRUCK RIGHT
 	  console.log("d");
+	  var viewMatrix = camera.getTruckedViewMatrix(-1);
 	}
+
 	if (currentlyPressedKeys[KeyboardEnum.Q]) {
-	  // q
+	  // q - PEDESTAL UP (CAMERA HEIGHT) 
 	  console.log("q");
+	  var viewMatrix = camera.getPedestaledViewMatrix(1);
 	}
+
 	if (currentlyPressedKeys[KeyboardEnum.E]) {
-	  // e
+	  // e - PEDESTAL DOWN (CAMERA HEIGHT)
 	  console.log("e");
+	  var viewMatrix = camera.getPedestaledViewMatrix(-1);
 	}
+	
 	if (currentlyPressedKeys[KeyboardEnum.LEFT_ARROW]) {
-	  // Left cursor key
+	  // Left cursor key - HORIZONTAL PAN (YAW) LEFT
 	  console.log("<");
+	  var viewMatrix = camera.getYawedViewMatrix(1);
 	}
+	
 	if (currentlyPressedKeys[KeyboardEnum.RIGHT_ARROW]) {
-	  // Right cursor key
+	  // Right cursor key - HORIZONTAL PAN (YAW) RIGHT
 	  console.log(">");
+	  var viewMatrix = camera.getYawedViewMatrix(-1);
 	}
+	
 	if (currentlyPressedKeys[KeyboardEnum.UP_ARROW]) {
-	  // Up cursor key
+	  // Up cursor key - VERTICAL PAN (TILT) UP 	
 	  console.log("^");
+	  var viewMatrix = camera.getTiltedViewMatrix(1);
 	}
+	
 	if (currentlyPressedKeys[KeyboardEnum.DOWN_ARROW]) {
-	  // Down cursor key
+	  // Down cursor key - VERTICAL PAN (TILT) DOWN
 	  console.log("V");
+	  var viewMatrix = camera.getTiltedViewMatrix(-1);
 	}
 }
+
+function setupMessageArea() 
+{
+    	messageField = document.getElementById("messageArea");
+    	// document.getElementById("messageClear").setAttribute("onclick", "messageField.value='';");
+}
+
+function addMessage(message) 
+{
+    	var st = "->" + message + "\n";
+    	messageField.value += st;
+}
+
 
 function main()
 {
 	// ... global variables ...
 	var canvas = null;
 	var messageField = null;
-	function addMessage(message){
-		console.log(message);
-	}
+
+	setupMessageArea();
+
+	//message for user controls
+	//addMessage("Movement Controls:\nw\t- DOLLY-IN\na\t- TRUCK LEFT\ns\t- DOLLY-OUT\nd\t- TRUCK RIGHT\nq\t- PEDESTAL UP (CAMERA HEIGHT)\ne\t- PEDESTAL DOWN (CAMERA HEIGHT)\nLeft\t- HORIZONTAL PAN (YAW) LEFT\nRight\t- HORIZONTAL PAN (YAW) RIGHT\nUp\t- VERTICAL PAN (TILT) UP\nDown\t- VERTICAL PAN (TILT) DOWN");
+	
 	canvas = document.getElementById("myCanvas");
-	addMessage(((canvas)?"Canvas acquired":"Error: Can not acquire canvas"));
-	gl = getWebGLContext(canvas, true); // TODO - disable debugging before submitting
+	console.log(((canvas)?"Canvas acquired":"Error: Can not acquire canvas"));
+	gl = getWebGLContext(canvas, false); // TODO - disable debugging before submitting
 	
 	document.onkeydown = handleKeyDown;
-    document.onkeyup = handleKeyUp;
+    	document.onkeyup = handleKeyUp;
 		
 	var angle=0;
 	var modelList = document.getElementById("modelList")
