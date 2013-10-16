@@ -1,3 +1,9 @@
+// Jonathan Cools-Lartigue, Brandon Forster
+// Matt Hansen, Alex Horan
+// CAP 4720- Project 2
+// 17 October 2013
+
+
 "use strict";
 function RenderableModel(gl,model){
 	function Drawable(attribLocations, vArrays, nVertices, indexArray, drawMode){
@@ -58,33 +64,33 @@ function RenderableModel(gl,model){
 	
 	// Vertex shader program
 	var VSHADER_SOURCE =
-	  'attribute vec3 position;\n' + 
-	  'attribute vec3 normal;\n' + 
-	  'uniform mat4 modelT, viewT, projT;\n' + 
-	  'uniform mat4 normalMatrix;\n' + 
-	  'uniform vec3 lightColor, lightPosition, ambientLight;\n' + 
-	  'varying vec3 fcolor;\n' +
-	  'varying vec3 fragPosition;\n' + 
-	  'varying vec3 fragNormal;\n' + 
-	  'void main() {\n' +
-	  '  gl_Position = projT*viewT*modelT*vec4(position,1.0);\n' + 
-	  '  fragNormal = normalize((normalMatrix * vec4(normal, 0.0)).xyz);\n' +
-	  '  fragPosition = (modelT * vec4(position, 1.0)).xyz;\n' +
-      '  vec3 lightDirection = normalize(lightPosition - fragPosition);\n' +
-	  '  float cosThetaIn = max(dot(fragNormal, lightDirection), 0.0);\n' +
-	  '  vec3 diffuse = lightColor * vec3(0.8,0.8,0.8) * cosThetaIn;\n' +
-	  '  vec3 ambient = ambientLight * vec3(0.8,0.8,0.8);\n' +
-	  '  fcolor = (diffuse + ambient);\n' +
-	  '}\n';
+		'attribute vec3 position;\n' + 
+		'attribute vec3 normal;\n' + 
+		'uniform mat4 modelT, viewT, projT;\n' + 
+		'uniform mat4 normalMatrix;\n' + 
+		'uniform vec3 lightColor, lightPosition, ambientLight;\n' + 
+		'varying vec3 fcolor;\n' +
+		'varying vec3 fragPosition;\n' + 
+		'varying vec3 fragNormal;\n' + 
+		'void main() {\n' +
+		'  gl_Position = projT*viewT*modelT*vec4(position,1.0);\n' + 
+		'  fragNormal = normalize((normalMatrix * vec4(normal, 0.0)).xyz);\n' +
+		'  fragPosition = (modelT * vec4(position, 1.0)).xyz;\n' +
+	     '  vec3 lightDirection = normalize(lightPosition - fragPosition);\n' +
+		'  float cosThetaIn = max(dot(fragNormal, lightDirection), 0.0);\n' +
+		'  vec3 diffuse = lightColor * vec3(0.8,0.8,0.8) * cosThetaIn;\n' +
+		'  vec3 ambient = ambientLight * vec3(0.8,0.8,0.8);\n' +
+		'  fcolor = (diffuse + ambient);\n' +
+		'}\n';
 
 	// Fragment shader program
 	var FSHADER_SOURCE =
-	  'varying lowp vec3 fcolor;\n' +
-	  'varying lowp vec3 fragPosition;\n' +
-	  'varying lowp vec3 fragNormal;\n' +
-	  'void main() {\n' +
-	  '  gl_FragColor = vec4(fcolor, 1.0);\n' +
-	  '}\n';
+		'varying lowp vec3 fcolor;\n' +
+		'varying lowp vec3 fragPosition;\n' +
+		'varying lowp vec3 fragNormal;\n' +
+		'void main() {\n' +
+		'  gl_FragColor = vec4(fcolor, 1.0);\n' +
+		'}\n';
 	  
 	var program = createProgram(gl, VSHADER_SOURCE, FSHADER_SOURCE);
 	if (!program) {
@@ -144,11 +150,11 @@ function RenderableModel(gl,model){
 		gl.uniformMatrix4fv(vmLoc, false, vMatrix.elements);
 		
 		// Set the light color (white)
-		gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
+		gl.uniform3f(u_LightColor, 1, 1, 1);
 		// Set the light direction (in the world coordinate)
-		gl.uniform3fv(u_LightPosition, camera.neweye);
+		gl.uniform3fv(u_LightPosition, camera.speclight);
 		// Set the ambient light
-		gl.uniform3f(u_AmbientLight, 0.1, 0.1, 0.1);
+		gl.uniform3f(u_AmbientLight, .1, .1, .1);
 		
 		//var vpMatrix = new Matrix4(pMatrix).multiply(vMatrix); // Right multiply
 		for (var i = 0; i < nDrawables; i++){
