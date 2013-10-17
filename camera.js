@@ -18,6 +18,7 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 	var near = diagonal*0.1;
 	var far = diagonal*3;
 	var FOV = 32;
+	var viewMatrix = null;
 
 	this.neweye=eye;
 	this.speclight=eye;
@@ -28,7 +29,8 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 	};
 	this.getViewMatrix=function(e){
 		if (e==undefined) e = eye;
-		return new Matrix4().setLookAt(e[0],e[1],e[2],at[0],at[1],at[2],up[0],up[1],up[2]);
+		viewMatrix = new Matrix4().setLookAt(e[0],e[1],e[2],at[0],at[1],at[2],up[0],up[1],up[2]);
+		return viewMatrix;
 	}
 	this.getRotatedViewMatrix=function(angle){
 		neweye=this.getRotatedCameraPosition(angle);
@@ -52,7 +54,16 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 		center[0]+= direction;
 	}
 	this.getPedestaledViewCameraPosition=function(direction){ 
-		//return direction*;
+		var delta = direction * diagonal * 0.02; // increment of movement
+		
+		// Check to make sure view matrix is not null
+		if (!viewMatrix){
+			this.getViewMatrix
+		}
+		
+		viewMatrix.translate(-up[0]*delta, -up[1]*delta, -up[2]*delta)*eye;
+		viewMatrix.translate(-up[0]*delta, -up[1]*delta, -up[2]*delta)*at;
+		return viewMatrix;
 	}
 	this.getTruckedViewCameraPosition=function(direction){ 
 		//return direction*;

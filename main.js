@@ -16,6 +16,8 @@ function parseJSON(jsonFile)
 
 var gl;
 var model, camera, projMatrix;
+var vm = null;
+
 function loadModel(modelfilename)
 {
 	//console.log(modelfilename);
@@ -94,13 +96,13 @@ function handleKeys() {
 	if (currentlyPressedKeys[KeyboardEnum.Q]) {
 	  // q - PEDESTAL UP (CAMERA HEIGHT) 
 	  console.log("q");
-	  var viewMatrix = camera.getPedestaledViewCameraPosition(1);
+	  vm = camera.getPedestaledViewCameraPosition(1);
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.E]) {
 	  // e - PEDESTAL DOWN (CAMERA HEIGHT)
 	  console.log("e");
-	  var viewMatrix = camera.getPedestaledViewCameraPosition(-1);
+	  vm = camera.getPedestaledViewCameraPosition(-1);
 	}
 	
 	if (currentlyPressedKeys[KeyboardEnum.LEFT_ARROW]) {
@@ -165,7 +167,9 @@ function main()
 	
 	function draw(){
 		gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-		var viewMatrix = camera.getRotatedViewMatrix(angle);
+		var viewMatrix = null;
+		if (vm) viewMatrix = vm;
+		else viewMatrix = camera.getRotatedViewMatrix(angle);
 		model.draw(projMatrix, viewMatrix);
 		if (angle > 360) angle -= 360;
 		window.requestAnimationFrame(draw);
