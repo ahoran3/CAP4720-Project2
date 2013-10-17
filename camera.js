@@ -29,7 +29,8 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 	};
 	this.getViewMatrix=function(e){
 		if (e==undefined) e = eye;
-		viewMatrix = new Matrix4().setLookAt(e[0],e[1],e[2],at[0],at[1],at[2],up[0],up[1],up[2]);
+		//if (!viewMatrix)
+			viewMatrix = new Matrix4().setLookAt(e[0],e[1],e[2],at[0],at[1],at[2],up[0],up[1],up[2]);
 		return viewMatrix;
 	}
 	this.getRotatedViewMatrix=function(angle){
@@ -54,22 +55,24 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 		center[0]+= direction;
 	}
 	this.getPedestaledViewCameraPosition=function(direction){ 
-		var delta = direction * diagonal * 0.02; // increment of movement
-		
+		// var delta = direction * diagonal * 0.02; // increment of movement
 		// Check to make sure view matrix is not null
-		if (!viewMatrix){
-			this.getViewMatrix
-		}
-		
-		viewMatrix.translate(-up[0]*delta, -up[1]*delta, -up[2]*delta)*eye;
-		viewMatrix.translate(-up[0]*delta, -up[1]*delta, -up[2]*delta)*at;
-		return viewMatrix;
+		// if (!viewMatrix){
+			// this.getViewMatrix; // set the viewMatrix
+		// }	
+		// viewMatrix.translate(-up[0]*delta, -up[1]*delta, -up[2]*delta)*eye;
+		// viewMatrix.translate(-up[0]*delta, -up[1]*delta, -up[2]*delta)*at;
+		// return viewMatrix;
+		eye[1] += direction;
+		at[1] += direction;
 	}
 	this.getTruckedViewCameraPosition=function(direction){ 
-		//return direction*;
+		eye[0] += direction;
+		at[0] += direction;
 	}
 	this.getDolliedViewCameraPosition=function(direction){ 
-		//return direction*;
+		eye[2] += direction;
+		at[2] += direction;
 	};
 
 
