@@ -46,11 +46,10 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 		return camera.getProjMatrix();
 	}
 	this.getTiltedViewCameraPosition=function(direction){
-		//translate(eyePoint[0],eyePoint[1],eyePoint[2]) * rotate(tiltAngle,U[0],U[1],U[2]) * translate(-eyePoint[0],-eyePoint[1],-eyePoint[2]) * atPoint
-		//return direction*;
+		center[1]+= direction;
 	}
 	this.getYawedViewCameraPosition=function(direction){ 
-		//return direction*;
+		center[0]+= direction;
 	}
 	this.getPedestaledViewCameraPosition=function(direction){ 
 		//return direction*;

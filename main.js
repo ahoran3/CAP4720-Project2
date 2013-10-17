@@ -27,14 +27,7 @@ function loadModel(modelfilename)
 var currentlyPressedKeys = {};
 
 function handleKeyDown(event) {
-currentlyPressedKeys[event.keyCode] = true;
-
-	if (String.fromCharCode(event.keyCode) == "F") {
-	  filter += 1;
-	  if (filter == 3) {
-		filter = 0;
-	  }
-	}
+	currentlyPressedKeys[event.keyCode] = true;
 }
 
 function handleKeyUp(event) {
@@ -174,7 +167,7 @@ function main()
 		gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 		var viewMatrix = camera.getRotatedViewMatrix(angle);
 		model.draw(projMatrix, viewMatrix);
-		angle++; if (angle > 360) angle -= 360;
+		if (angle > 360) angle -= 360;
 		window.requestAnimationFrame(draw);
 		handleKeys();
 	}
