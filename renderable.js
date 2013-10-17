@@ -66,30 +66,32 @@ function RenderableModel(gl,model){
 	var VSHADER_SOURCE =
 		'attribute vec3 position;\n' + 
 		'attribute vec3 normal;\n' + 
-		'uniform mat4 modelT, viewT, projT;\n' + 
-		'uniform mat4 normalMatrix;\n' + 
+		'uniform mat4 modelT, viewT, projT, normalMatrix;\n' + 
 		'uniform vec3 lightColor, lightPosition, ambientLight;\n' + 
-		'varying vec3 fcolor;\n' +
 		'varying vec3 fragPosition;\n' + 
 		'varying vec3 fragNormal;\n' + 
 		'void main() {\n' +
 		'  gl_Position = projT*viewT*modelT*vec4(position,1.0);\n' + 
-		'  fragNormal = normalize((normalMatrix * vec4(normal, 0.0)).xyz);\n' +
-		'  fragPosition = (modelT * vec4(position, 1.0)).xyz;\n' +
-	     '  vec3 lightDirection = normalize(lightPosition - fragPosition);\n' +
-		'  float cosThetaIn = max(dot(fragNormal, lightDirection), 0.0);\n' +
-		'  vec3 diffuse = lightColor * vec3(0.8,0.8,0.8) * cosThetaIn;\n' +
-		'  vec3 ambient = ambientLight * vec3(0.8,0.8,0.8);\n' +
-		'  fcolor = (diffuse + ambient);\n' +
+        '  fragNormal = normalize(viewT * normalMatrix * vec4(position, 0.0)).xyz;\n' +
+		'  fragPosition = vec3(viewT * modelT * vec4(position, 1.0));\n' + 
 		'}\n';
 
 	// Fragment shader program
 	var FSHADER_SOURCE =
-		'varying lowp vec3 fcolor;\n' +
 		'varying lowp vec3 fragPosition;\n' +
 		'varying lowp vec3 fragNormal;\n' +
+        'uniform lowp vec3 lightColor;\n' + 
+        'uniform lowp vec3 lightPosition;\n' + 
+        'uniform lowp vec3 ambientLight;\n' + 
+
 		'void main() {\n' +
-		'  gl_FragColor = vec4(fcolor, 1.0);\n' +
+        
+        '  lowp vec3 lightDirection = normalize(lightPosition - fragPosition);\n' +
+        '  lowp float brightness = clamp(dot(normalize(fragNormal), lightDirection), 0.0, 1.0);\n' +
+		'  lowp vec3 diffuse = lightColor  * brightness;\n' +
+        '  lowp vec3 ambient = ambientLight * 0.8;\n' +
+
+		'  gl_FragColor = vec4((diffuse + ambient), 1.0);\n' +
 		'}\n';
 	  
 	var program = createProgram(gl, VSHADER_SOURCE, FSHADER_SOURCE);
@@ -152,7 +154,7 @@ function RenderableModel(gl,model){
 		// Set the light color (white)
 		gl.uniform3f(u_LightColor, 1, 1, 1);
 		// Set the light direction (in the world coordinate)
-		gl.uniform3fv(u_LightPosition, camera.speclight);
+		gl.uniform3fv(u_LightPosition, [0,1,0]);//camera.speclight);
 		// Set the ambient light
 		gl.uniform3f(u_AmbientLight, .1, .1, .1);
 		
@@ -161,14 +163,16 @@ function RenderableModel(gl,model){
 			//var mMatrix=modelTransformations[i];
 			//var mvpMatrix = new Matrix4(vpMatrix).multiply(mMatrix);
 			//gl.uniformMatrix4fv(mvpLoc, false, mvpMatrix.elements);
-			gl.uniformMatrix4fv(mmLoc, false, (mMatrix)?(new Matrix4(mMatrix).multiply(modelTransformations[i])).elements
-				:modelTransformations[i].elements);
+			var moMatrix = (mMatrix)?(new Matrix4(mMatrix).multiply(modelTransformations[i]))
+				:modelTransformations[i];
+            
+            gl.uniformMatrix4fv(mmLoc, false, moMatrix.elements);
 
 			// Pass the matrix to transform the normal based on the model matrix to u_NormalMatrix
 			//normalMat = modelMatrixToNormalMatrix(vMatrix);
-			normalMat.setInverseOf(vMatrix);
-			normalMat.transpose();
-			gl.uniformMatrix4fv(u_NormalMatrix, false, normalMat.elements);
+			var nMatrix = modelMatrixToNormalMatrix(moMatrix);
+            
+			gl.uniformMatrix4fv(u_NormalMatrix, false, nMatrix.elements);
 			
 			drawables[i].draw();
 		}
