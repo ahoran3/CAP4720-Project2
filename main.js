@@ -15,13 +15,13 @@ function parseJSON(jsonFile)
 }
 
 var gl;
-var model, camera, projMatrix, adjustment;
+var model, camera, projMatrix;
 
 function loadModel(modelfilename)
 {
 	//console.log(modelfilename);
 	model = new RenderableModel(gl,parseJSON(modelfilename));
-	camera = new Camera(gl,model.getBounds(),[0,1,0]);
+	camera = new Camera(gl,model.getBounds(),[0,1,1]);
 	projMatrix = camera.getProjMatrix();
 }
 
@@ -151,8 +151,6 @@ function main()
 	var messageField = null;
 
 	setupMessageArea();
-
-	adjustment = new Adjustment();
 	
 	canvas = document.getElementById("myCanvas");
 	console.log(((canvas)?"Canvas acquired":"Error: Can not acquire canvas"));
@@ -164,11 +162,15 @@ function main()
 	var modelList = document.getElementById("modelList")
 	loadModel(modelList.options[modelList.selectedIndex].value);
 	
+        var angle=0;
+
+    
 	function draw(){
 		gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-		var viewMatrix = camera.getAdjustedViewMatrix(adjustment.getAdjustment());
+		var viewMatrix = camera.getRotatedViewMatrix(angle);
 		model.draw(projMatrix, viewMatrix);
-		window.requestAnimationFrame(draw);
+        angle++; if (angle > 360) angle -= 360;
+        window.requestAnimationFrame(draw);
 		handleKeys();
 	}
 
