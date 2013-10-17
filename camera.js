@@ -7,7 +7,10 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 {
 	var center = [(d.min[0]+d.max[0])/2,(d.min[1]+d.max[1])/2,(d.min[2]+d.max[2])/2];
 	var diagonal = Math.sqrt(Math.pow((d.max[0]-d.min[0]),2)+Math.pow((d.max[1]-d.min[1]),2)+Math.pow((d.max[2]-d.min[2]),2));
-	var ZoomDelta = Math.sqrt(Math.sqrt(diagonal/4)); //basically arbitrarily picked
+	var ZoomDelta = Math.sqrt(Math.sqrt(diagonal/4));
+	var angleDelta = Math.sqrt(diagonal/10);
+	var moveDelta = diagonal/100;
+
 	//console.log(center+" "+diagonal);
 	
 	//variables for automatic camera rotation	
@@ -49,10 +52,16 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 		return camera.getProjMatrix();
 	}
 	this.getTiltedViewCameraPosition=function(direction){
-		center[1]+= direction;
+		center[1] += direction*angleDelta;
+		//at[1] += direction*angleDelta;
+		neweye = [center[0], center[1], center[2]];
+		return this.getViewMatrix(neweye);
 	}
 	this.getYawedViewCameraPosition=function(direction){ 
-		center[0]+= direction;
+		center[0] += direction*angleDelta;
+		// at[0] += direction*angleDelta;
+		neweye = [center[0], center[1], center[2]];
+		return this.getViewMatrix(neweye);
 	}
 	this.getPedestaledViewCameraPosition=function(direction){ 
 		// var delta = direction * diagonal * 0.02; // increment of movement
@@ -63,16 +72,16 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 		// viewMatrix.translate(-up[0]*delta, -up[1]*delta, -up[2]*delta)*eye;
 		// viewMatrix.translate(-up[0]*delta, -up[1]*delta, -up[2]*delta)*at;
 		// return viewMatrix;
-		eye[1] += direction;
-		at[1] += direction;
+		eye[1] += direction*angleDelta;
+		at[1] += direction*angleDelta;
 	}
 	this.getTruckedViewCameraPosition=function(direction){ 
-		eye[0] += direction;
-		at[0] += direction;
+		eye[0] += direction*moveDelta;
+		at[0] += direction*moveDelta;
 	}
 	this.getDolliedViewCameraPosition=function(direction){ 
-		eye[2] += direction;
-		at[2] += direction;
+		eye[2] += direction*moveDelta;
+		at[2] += direction*moveDelta;
 	};
 
 
