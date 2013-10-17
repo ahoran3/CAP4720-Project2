@@ -67,11 +67,12 @@ function RenderableModel(gl,model){
 		'attribute vec3 position;\n' + 
 		'attribute vec3 normal;\n' + 
 		'uniform mat4 modelM, viewM, projM, normalM;\n' + 
-		'uniform vec3 lightColor, lightPosition, ambientLight;\n' + 
+		//'uniform vec3 lightColor, lightPosition, ambientLight;\n' + 
 		'varying vec3 fragPosition;\n' + 
 		'varying vec3 fragNormal;\n' +
  
-		'void main() {\n' +
+ 
+        'void main() {\n' +
 		'  gl_Position = projM * viewM* modelM * vec4(position, 1.0);\n' + 
         '  fragPosition = (viewM * modelM * vec4(position, 1.0)).xyz;\n' +
         '  vec3 vNormal = (normalM * vec4(normal, 0.0)).xyz;\n ' +
@@ -88,12 +89,12 @@ function RenderableModel(gl,model){
 
 		'void main() {\n' +
         
-        '  vec3 lightDirection = normalize(lightPosition - fragPosition);\n' +
-		//'  float cosThetaIn = max(dot(fragNormal, lightDirection), 0.0);\n' +
-		//'  vec3 diffuse = lightColor * vec3(0.8,0.8,0.8) * cosThetaIn;\n' +
-//'  vec3 ambient = ambientLight * 0.8;\n' +
+        '  lowp vec3 lightDirection = normalize(lightPosition - fragPosition);\n' +
+		'  lowp float cosThetaIn = max(dot(fragNormal, lightDirection), 0.0);\n' +
+		'  lowp vec3 diffuse = lightColor * vec3(0.8,0.8,0.8) * cosThetaIn;\n' +
+        '  lowp vec3 ambient = ambientLight * 0.8;\n' +
 
-//		'  gl_FragColor = vec4((diffuse + ambient), 1.0);\n' +
+		'  gl_FragColor = vec4((vec3(0.8,0.8,0.8) + ambient), 1.0);\n' +
 		'}\n';
 	  
 	var program = createProgram(gl, VSHADER_SOURCE, FSHADER_SOURCE);
