@@ -40,37 +40,9 @@ function Camera(gl,d,modelUp) // Compute a camera from model's bounding box dime
 		return new Matrix4().setPerspective(FOV, gl.canvas.width / gl.canvas.height, near , far);
 	}
 	
-	//functions for user camera control 
-	//the '-1' or '+1' from the parameter in main.js allows us to use the same function with different directions
-	
-	this.getZoomedProjMatrix=function(direction){
-		FOV = Math.min(60,Math.max((FOV + direction*ZoomDelta),5));
-		return camera.getProjMatrix();
+    this.getAdjustedViewMatrix=function(matrix)
+    {
+		 return new Matrix4().setLookAt(eye[0],eye[1],eye[2],at[0],at[1],at[2],up[0],up[1],up[2]).multiply(matrix);
 	}
-	this.getTiltedViewCameraPosition=function(direction){
-		center[1]+= direction;
-	}
-	this.getYawedViewCameraPosition=function(direction){ 
-		center[0]+= direction;
-	}
-	this.getPedestaledViewCameraPosition=function(direction){ 
-		var delta = direction * diagonal * 0.02; // increment of movement
-		
-		// Check to make sure view matrix is not null
-		if (!viewMatrix){
-			this.getViewMatrix
-		}
-		
-		viewMatrix.translate(-up[0]*delta, -up[1]*delta, -up[2]*delta)*eye;
-		viewMatrix.translate(-up[0]*delta, -up[1]*delta, -up[2]*delta)*at;
-		return viewMatrix;
-	}
-	this.getTruckedViewCameraPosition=function(direction){ 
-		//return direction*;
-	}
-	this.getDolliedViewCameraPosition=function(direction){ 
-		//return direction*;
-	};
-
-
+    
 }

@@ -15,8 +15,7 @@ function parseJSON(jsonFile)
 }
 
 var gl;
-var model, camera, projMatrix;
-var vm = null;
+var model, camera, projMatrix, adjustment;
 
 function loadModel(modelfilename)
 {
@@ -60,37 +59,39 @@ function handleKeys() {
 	if (currentlyPressedKeys[KeyboardEnum.Z]) {
 	  // z - ZOOM IN 
 	  console.log("z");
-	  projMatrix = camera.getZoomedProjMatrix(-1);
+
+        adjustment.adjustZoomIn();
+
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.X]) {
 	  // x- ZOOM OUT 
 	  console.log("x");
-	  projMatrix = camera.getZoomedProjMatrix(1);
+    adjustment.adjustZoomOut();
 	}	
 
 	if (currentlyPressedKeys[KeyboardEnum.W]) {
 	  // w - DOLLY-IN (MOVE FORWARD)
 	  console.log("w");
-	  var viewMatrix = camera.getDolliedViewCameraPosition(1);
+adjustment.adjustUp();
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.A]) {
 	  // a - 	TRUCK LEFT 
 	  console.log("a");
-	  var viewMatrix = camera.getTruckedViewCameraPosition(1);
+adjustment.adjustLeft();
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.S]) {
 	  // s - DOLLY-OUT (MOVE BACK)
 	  console.log("s");
-	  var viewMatrix = camera.getDolliedViewCameraPosition(-1);
+adjustment.adjustDown();
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.D]) {
 	  // d - TRUCK RIGHT
 	  console.log("d");
-	  var viewMatrix = camera.getTruckedViewCameraPosition(-1);
+adjustment.adjustRight();
 	}
 
 	if (currentlyPressedKeys[KeyboardEnum.Q]) {
@@ -151,8 +152,7 @@ function main()
 
 	setupMessageArea();
 
-	//message for user controls
-	//addMessage("Movement Controls:\nw\t- DOLLY-IN\na\t- TRUCK LEFT\ns\t- DOLLY-OUT\nd\t- TRUCK RIGHT\nq\t- PEDESTAL UP (CAMERA HEIGHT)\ne\t- PEDESTAL DOWN (CAMERA HEIGHT)\nLeft\t- HORIZONTAL PAN (YAW) LEFT\nRight\t- HORIZONTAL PAN (YAW) RIGHT\nUp\t- VERTICAL PAN (TILT) UP\nDown\t- VERTICAL PAN (TILT) DOWN");
+	adjustment = new Adjustment();
 	
 	canvas = document.getElementById("myCanvas");
 	console.log(((canvas)?"Canvas acquired":"Error: Can not acquire canvas"));
@@ -161,17 +161,13 @@ function main()
 	document.onkeydown = handleKeyDown;
     	document.onkeyup = handleKeyUp;
 		
-	var angle=0;
 	var modelList = document.getElementById("modelList")
 	loadModel(modelList.options[modelList.selectedIndex].value);
 	
 	function draw(){
 		gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-		var viewMatrix = null;
-		if (vm) viewMatrix = vm;
-		else viewMatrix = camera.getRotatedViewMatrix(angle);
+		var viewMatrix = camera.getAdjustedViewMatrix(adjustment.getAdjustment());
 		model.draw(projMatrix, viewMatrix);
-		if (angle > 360) angle -= 360;
 		window.requestAnimationFrame(draw);
 		handleKeys();
 	}
