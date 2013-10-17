@@ -128,6 +128,17 @@ function handleKeys() {
 	}
 }
 
+// indicate whether to use spot or omni lighting. default to spot.
+var lightType= 0;
+
+function getLightType() {
+	if(document.getElementById('lightType_spot').checked) {
+		lightType= 0;
+	}else if(document.getElementById('lightType_omni').checked) {
+		lightType= 1;
+	}
+}
+
 function setupMessageArea() 
 {
     	messageField = document.getElementById("messageArea");
@@ -170,6 +181,7 @@ function main()
 		if (angle > 360) angle -= 360;
 		window.requestAnimationFrame(draw);
 		handleKeys();
+		getLightType();
 	}
 
 	gl.clearColor(0,0,0,1);
