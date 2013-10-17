@@ -23,3 +23,7 @@ include ambient lighting : (3 points)
 
  - No grade if you do not demo in the class.
   - grade points will be proportional to the performance in project related exam  (question will  be part of the exam 2).
+  
+  
+ 
+Available on GitHub at https://github.com/ahoran3/CAP4720-Project2.

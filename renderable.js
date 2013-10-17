@@ -62,8 +62,39 @@ function RenderableModel(gl,model){
 	  }
 	}
 	
-	// Vertex shader program
-	var VSHADER_SOURCE =
+	// Vertex shader program for omni
+	var OMNI_VSHADER_SOURCE =
+		'attribute vec3 position;\n' + 
+		'attribute vec3 normal;\n' + 
+		'uniform mat4 modelT, viewT, projT;\n' + 
+		'uniform mat4 normalMatrix;\n' + 
+		'uniform vec3 lightColor, lightPosition, ambientLight;\n' + 
+		'varying vec3 fcolor;\n' +
+		'varying vec3 fragPosition;\n' + 
+		'varying vec3 fragNormal;\n' + 
+		'void main() {\n' +
+		'  gl_Position = projT*viewT*modelT*vec4(position,1.0);\n' + 
+		'  fragNormal = normalize((normalMatrix * vec4(normal, 0.0)).xyz);\n' +
+		'  fragPosition = (modelT * vec4(position, 1.0)).xyz;\n' +
+	     '  vec3 lightDirection = normalize(lightPosition - fragPosition);\n' +
+		'  float cosThetaIn = max(dot(fragNormal, lightDirection), 0.0);\n' +
+		'  vec3 diffuse = lightColor * vec3(0.8,0.8,0.8) * cosThetaIn;\n' +
+		'  vec3 ambient = ambientLight * vec3(0.8,0.8,0.8);\n' +
+		'  fcolor = (diffuse + ambient);\n' +
+		'}\n';
+
+	// Fragment shader program for omni
+	var OMNI_FSHADER_SOURCE =
+		'varying lowp vec3 fcolor;\n' +
+		'varying lowp vec3 fragPosition;\n' +
+		'varying lowp vec3 fragNormal;\n' +
+		'void main() {\n' +
+		'  gl_FragColor = vec4(fcolor, 1.0);\n' +
+		'}\n';
+
+	
+	// Vertex shader program for spot
+	var SPOT_VSHADER_SOURCE =
 		'attribute vec3 position;\n' + 
 		'attribute vec3 normal;\n' + 
 		'uniform mat4 modelT, viewT, projT, normalMatrix;\n' + 
@@ -76,8 +107,8 @@ function RenderableModel(gl,model){
 		'  fragPosition = vec3(viewT * modelT * vec4(position, 1.0));\n' + 
 		'}\n';
 
-	// Fragment shader program
-	var FSHADER_SOURCE =
+	// Fragment shader program for spot
+	var SPOT_FSHADER_SOURCE =
 		'varying lowp vec3 fragPosition;\n' +
 		'varying lowp vec3 fragNormal;\n' +
         'uniform lowp vec3 lightColor;\n' + 
@@ -94,11 +125,25 @@ function RenderableModel(gl,model){
 		'  gl_FragColor = vec4((diffuse + ambient), 1.0);\n' +
 		'}\n';
 	  
-	var program = createProgram(gl, VSHADER_SOURCE, FSHADER_SOURCE);
-	if (!program) {
+	var spotProgram = createProgram(gl, SPOT_VSHADER_SOURCE, SPOT_FSHADER_SOURCE);
+	if (!spotProgram) {
 		console.log('Failed to create program');
 		return false;
 	}
+	
+	var omniProgram = createProgram(gl, OMNI_VSHADER_SOURCE, OMNI_FSHADER_SOURCE);
+	if (!omniProgram) {
+		console.log('Failed to create program');
+		return false;
+	}
+	
+	var program;
+	
+	if (lightType == 0){
+		program= spotProgram;}
+	else{
+		program= omniProgram;}
+	
 	//else console.log('Shader Program was successfully created.');
 	var a_Position = gl.getAttribLocation(program, 'position');		  
 	//var a_Color = gl.getAttribLocation(program, 'color');
@@ -147,14 +192,20 @@ function RenderableModel(gl,model){
 	// Get the location/address of the vertex attribute inside the shader program.
 	this.draw = function (pMatrix,vMatrix,mMatrix)
 	{
-		gl.useProgram(program);
+		if (lightType == 0 ){
+			gl.useProgram(spotProgram);}
+		else {
+			gl.useProgram(omniProgram);}
 		gl.uniformMatrix4fv(pmLoc, false, pMatrix.elements);
 		gl.uniformMatrix4fv(vmLoc, false, vMatrix.elements);
 		
 		// Set the light color (white)
 		gl.uniform3f(u_LightColor, 1, 1, 1);
 		// Set the light direction (in the world coordinate)
-		gl.uniform3fv(u_LightPosition, [0,1,0]);//camera.speclight);
+		if (lightType == 0)
+			gl.uniform3fv(u_LightPosition, [0,1,0]);
+		else
+			gl.uniform3fv(u_LightPosition, camera.speclight);
 		// Set the ambient light
 		gl.uniform3f(u_AmbientLight, .1, .1, .1);
 		
@@ -163,16 +214,27 @@ function RenderableModel(gl,model){
 			//var mMatrix=modelTransformations[i];
 			//var mvpMatrix = new Matrix4(vpMatrix).multiply(mMatrix);
 			//gl.uniformMatrix4fv(mvpLoc, false, mvpMatrix.elements);
+			if (lightType == 1){
+				gl.uniformMatrix4fv(mmLoc, false, (mMatrix)?(new Matrix4(mMatrix).multiply(modelTransformations[i])).elements
+					:modelTransformations[i].elements);}
+			else	{
 			var moMatrix = (mMatrix)?(new Matrix4(mMatrix).multiply(modelTransformations[i]))
 				:modelTransformations[i];
             
-            gl.uniformMatrix4fv(mmLoc, false, moMatrix.elements);
+            gl.uniformMatrix4fv(mmLoc, false, moMatrix.elements);}
 
 			// Pass the matrix to transform the normal based on the model matrix to u_NormalMatrix
 			//normalMat = modelMatrixToNormalMatrix(vMatrix);
-			var nMatrix = modelMatrixToNormalMatrix(moMatrix);
+			if (lightType == 1){
+			normalMat.setInverseOf(vMatrix);
+			normalMat.transpose();
+			gl.uniformMatrix4fv(u_NormalMatrix, false, normalMat.elements);
+			}
+			else
+			{
+				var nMatrix = modelMatrixToNormalMatrix(moMatrix);
             
-			gl.uniformMatrix4fv(u_NormalMatrix, false, nMatrix.elements);
+			gl.uniformMatrix4fv(u_NormalMatrix, false, nMatrix.elements);}
 			
 			drawables[i].draw();
 		}
