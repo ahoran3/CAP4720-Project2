@@ -91,10 +91,10 @@ function RenderableModel(gl,model){
         
         '  lowp vec3 lightDirection = normalize(lightPosition - fragPosition);\n' +
 		'  lowp float cosThetaIn = max(dot(fragNormal, lightDirection), 0.0);\n' +
-		'  lowp vec3 diffuse = lightColor * vec3(0.8,0.8,0.8) * cosThetaIn;\n' +
+		'  lowp vec3 diffuse = lightColor * vec3(0.8,0.8,0.9) * cosThetaIn;\n' +
         '  lowp vec3 ambient = ambientLight * 0.8;\n' +
 
-		'  gl_FragColor = vec4((vec3(0.8,0.8,0.8) + ambient), 1.0);\n' +
+		'  gl_FragColor = vec4((diffuse + ambient), 1.0);\n' +
 		'}\n';
 	  
 	var program = createProgram(gl, VSHADER_SOURCE, FSHADER_SOURCE);
