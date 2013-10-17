@@ -88,7 +88,7 @@ function RenderableModel(gl,model){
         
         '  lowp vec3 lightDirection = normalize(lightPosition - fragPosition);\n' +
         '  lowp float brightness = clamp(dot(normalize(fragNormal), lightDirection), 0.0, 1.0);\n' +
-		'  lowp vec3 diffuse = lightColor  * brightness;\n' +
+		'  lowp vec3 diffuse = lightColor  * brightness * 0.8;\n' +
         '  lowp vec3 ambient = ambientLight * 0.8;\n' +
 
 		'  gl_FragColor = vec4((diffuse + ambient), 1.0);\n' +
