@@ -47,9 +47,9 @@
 
     <h3>Movement Controls:</h3>
     <ul>
-        <li><strong> W</strong> - MOVE FORWARD</li>  
+        <li><strong> W</strong> - DOLLY IN</li>  
         <li><strong> A</strong> - TRUCK LEFT</li>  
-        <li><strong> S</strong> - MOVE BACK</li>  
+        <li><strong> S</strong> - DOLLY OUT</li>  
         <li><strong> D</strong> - TRUCK RIGHT</li>  
         <li style="color:green"><strong> Z</strong> - ZOOM IN</li>  
         <li style="color:green"><strong> X</strong> - ZOOM OUT</li>  
@@ -77,6 +77,8 @@
         <option value='lib\DijonPalais\models\model.json'>Dijon Palais</option>
         <option value='lib\House\models\model.json'>House</option>
     </select>
+	<input type="radio" name="lightType" id="lightType_spot" value="spot" checked>Spotlight
+	<input type="radio" name="lightType" id="lightType_omni" value="omni">Omnilight
     </td>
     <td>
     <button type="button" id="messageClear">clear message</button><br/>
