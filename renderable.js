@@ -70,29 +70,30 @@ function RenderableModel(gl,model){
 		'uniform vec3 lightColor, lightPosition, ambientLight;\n' + 
 		'varying vec3 fragPosition;\n' + 
 		'varying vec3 fragNormal;\n' +
-        'varying vec3 fcolor;\n' +
  
 		'void main() {\n' +
 		'  gl_Position = projM * viewM* modelM * vec4(position, 1.0);\n' + 
         '  fragPosition = (viewM * modelM * vec4(position, 1.0)).xyz;\n' +
         '  vec3 vNormal = (normalM * vec4(normal, 0.0)).xyz;\n ' +
 		'  fragNormal = normalize((viewM * vec4(vNormal, 1.0)).xyz);\n' +
-                
-    
-        '  vec3 lightDirection = normalize(lightPosition - fragPosition);\n' +
-		'  float cosThetaIn = max(dot(fragNormal, lightDirection), 0.0);\n' +
-		'  vec3 diffuse = lightColor * vec3(0.8,0.8,0.8) * cosThetaIn;\n' +
-		'  vec3 ambient = ambientLight * vec3(0.8,0.8,0.8);\n' +
-		'  fcolor = (diffuse + ambient);\n' +
-		'}\n';
+                    '}\n';
 
 	// Fragment shader program
 	var FSHADER_SOURCE =
-		'varying lowp vec3 fcolor;\n' +
 		'varying lowp vec3 fragPosition;\n' +
 		'varying lowp vec3 fragNormal;\n' +
+        'uniform lowp vec3 lightColor;\n' + 
+        'uniform lowp vec3 lightPosition;\n' + 
+        'uniform lowp vec3 ambientLight;\n' + 
+
 		'void main() {\n' +
-		'  gl_FragColor = vec4(fcolor, 1.0);\n' +
+        
+        '  vec3 lightDirection = normalize(lightPosition - fragPosition);\n' +
+		//'  float cosThetaIn = max(dot(fragNormal, lightDirection), 0.0);\n' +
+		//'  vec3 diffuse = lightColor * vec3(0.8,0.8,0.8) * cosThetaIn;\n' +
+//'  vec3 ambient = ambientLight * 0.8;\n' +
+
+//		'  gl_FragColor = vec4((diffuse + ambient), 1.0);\n' +
 		'}\n';
 	  
 	var program = createProgram(gl, VSHADER_SOURCE, FSHADER_SOURCE);
@@ -154,7 +155,7 @@ function RenderableModel(gl,model){
 		// Set the light color (white)
 		gl.uniform3f(u_LightColor, 1, 1, 1);
 		// Set the light direction (in the world coordinate)
-		gl.uniform3fv(u_LightPosition, [1,1,1]);//camera.speclight);
+		gl.uniform3fv(u_LightPosition, camera.speclight);
 		// Set the ambient light
 		gl.uniform3f(u_AmbientLight, .1, .1, .1);
 		
